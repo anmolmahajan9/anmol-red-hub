@@ -4,8 +4,12 @@
     --text-secondary: #86868b;
     --border-color: rgba(255, 255, 255, 0.1);
     --hover-bg: rgba(255, 255, 255, 0.04);
-    
+
     --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    
+    /* Easing for high-end UI */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 * {
@@ -25,8 +29,38 @@ body {
     display: flex;
     justify-content: center;
     padding: 6rem 2rem;
+    position: relative;
+    overflow-x: hidden;
+    /* Initial state for load fade */
     opacity: 0;
-    transition: opacity 1s ease-out;
+    transition: opacity 1.2s var(--ease-out-expo);
+}
+
+/* Atmospheric Background Elements */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 40% -20%, #1a1a2e 0%, transparent 60%);
+    pointer-events: none;
+    z-index: -2;
+    opacity: 0.6;
+}
+
+/* Subtle Noise Texture Overlay */
+.noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
 body.loaded {
@@ -59,6 +93,36 @@ body.loaded {
 .social-links {
     display: flex;
     gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #32d74b; /* iOS green */
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(50, 215, 75, 0.6);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
 }
 
 .social-links a {
@@ -176,9 +240,23 @@ body.loaded {
     body {
         padding: 3rem 1.5rem;
     }
-    
+
     .app-link {
         padding-inline: 1rem;
         margin-inline: -1rem;
     }
+}
+
+/* --- Scroll Reveal Animations --- */
+.reveal, .reveal-stagger {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+}
+
+/* Stagger calculation relies on JS intersection observer, but we can do a generic one if we want. 
+   Here, we just rely on intersection observer triggering them when they enter view. */
+.reveal.visible, .reveal-stagger.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
